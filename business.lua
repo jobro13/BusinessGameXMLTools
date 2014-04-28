@@ -75,6 +75,18 @@ function cmds.info(args)
 	end 
 end 
 
+function cmds.usage(args, nope) 
+	local product = args[1]
+	if not product or not bgtools.GetProduct(product) then 
+		print(product.. " is not a valid product!")
+		return 
+	end 
+	bgtools.PrintProductUses(product, nope)
+end
+
+function cmds.notusage(args)
+	cmds.usage(args, true)
+end
 
 
 

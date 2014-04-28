@@ -31,7 +31,7 @@ end
 function bgtools.GetProductInfo(product_root)
 	-- name and amount
 	local product = {} 
-	print(product_root)
+	--print(product_root)
 	local name = getval(product_root, "name")
 	local amount = getval(product_root, "amount") 
 	if name and amount then 
@@ -203,6 +203,55 @@ function bgtools.GetProductList()
 	end 
 	return out
 end 
+
+function bgtools.ListSectorProductRelation(product, relation, nope)
+	local out = {} -- all sectors which have this relation
+	print(nope)
+	for sector_number, sector_data in pairs(bgtools.sector) do 
+		if sector_data and sector_data:find(relation) then 
+			local product_data = bgtools.GetProducts(sector_data:find(relation))
+			local got = false 
+			for product_id, data in pairs(product_data) do 
+				local bool = data.name:lower() == tostring(product):lower() 
+				if bool then
+					if not nope then 
+						table.insert(out, getval(sector_data, "name"))
+					end
+					got = true 
+					break
+				end
+			end
+			if nope and not got then 
+				table.insert(out, getval(sector_data, "name"))
+			end
+		end 
+	end 
+	return out 
+end 
+
+function bgtools.GetProductUses(product, nope)
+	local usage = {}
+	usage.machinery = bgtools.ListSectorProductRelation(product, "machinery", nope)
+	usage.input = bgtools.ListSectorProductRelation(product, "input", nope)
+	usage.output = bgtools.ListSectorProductRelation(product, "output", nope)
+	return usage 
+end 
+
+function bgtools.PrintProductUses(product, nope)
+	local data = bgtools.GetProductUses(product, nope) 
+	print_group("To Construct")
+	for i,v in pairs(data.machinery, nope) do 
+		pd("|-", v) 
+	end 
+	print_group("As Input")
+	for i,v in pairs(data.input, nope) do 
+		pd("|-", v) 
+	end 
+	print_group("As Output")
+	for i,v in pairs(data.output, nope) do 
+		pd("|-", v) 
+	end 
+end
 
 function bgtools.fileupdate()
 	io.popen("curl -O http://businessgame.be/xml/products.xml")

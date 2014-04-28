@@ -1,4 +1,5 @@
-xml = require "LuaXML"
+require "LuaXML"
+assert(xml)
 bgtools = require "bgtools"
 
 
@@ -18,7 +19,7 @@ end
 local cmds = {} 
 
 function cmds.quit()
-	print("Goodbye")
+	print("Goodbye!")
 	os.exit()
 end 
 

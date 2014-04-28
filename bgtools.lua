@@ -227,7 +227,6 @@ end
 
 function bgtools.ListSectorProductRelation(product, relation, nope)
 	local out = {} -- all sectors which have this relation
-	print(nope)
 	for sector_number, sector_data in pairs(bgtools.sector) do 
 		if sector_data and sector_data:find(relation) then 
 			local product_data = bgtools.GetProducts(sector_data:find(relation))
@@ -327,6 +326,18 @@ function bgtools.SectorAddedValue(sector)
 	local rounded = round(percent_increase, 1)
 	return diff, rounded , w1, w2
 end 
+
+-- finds all possible routes from raw resources
+function bgtools.Flow(product, raw)
+	local routes = {}
+	if bgtools.GetProduct(product) then 
+		local ProductSources = bgtools.ListSectorProductRelation(product, "output")
+		-- list of sectors in which the product is outputted ^
+		
+		return routes 
+	end 
+end
+
 
 local out = {}
 

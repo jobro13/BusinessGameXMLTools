@@ -260,6 +260,53 @@ function bgtools.fileupdate()
 	bgtools.products = xml.load("products.xml")
 end 
 
+function bgtools.GetSectorInventory(sector, mode, multiplier)
+	local multiplier = multiplier or 1 
+	local mode = mode or "input" 
+	local sector = bgtools.GetSector(sector) 
+	if sector then 
+		local data = sector:find(mode) 
+		if data then 
+			local inventory = {} 
+			local products = bgtools.GetProducts(data)
+			for i,v in pairs(products) do 
+				if v.amount then 
+					inventory[v.name] = v.amount * multiplier
+				end 
+			end
+			return inventory 
+		end 
+	end 
+	return {}, false 
+end 
+
+function bgtools.InventoryWorth(inventory) -- {prodname = prodammount, ..}
+	local worth = 0 
+	for prodname, prodamount in pairs(inventory) do 
+		local product = bgtools.GetProduct(prodname) 
+		if product then 
+			local price = getval(product, "price")
+			worth = worth + prodamount * price 
+		end
+	end 
+	return worth 
+end
+
+function round(num, idp)
+  local mult = 10^(idp or 0)
+  return math.floor(num * mult + 0.5) / mult
+end
+
+function bgtools.SectorAddedValue(sector)
+	local input = bgtools.GetSectorInventory(sector, "input")
+	local output = bgtools.GetSectorInventory(sector, "output")
+	local w1, w2 = bgtools.InventoryWorth(input), bgtools.InventoryWorth(output)
+	local diff = w2 - w1 
+	local percent_increase = ((w2 - w1) / w1) * 100
+	local rounded = round(percent_increase, 1)
+	return diff, rounded , w1, w2
+end 
+
 local out = {}
 
 out.init = function(sector_xml, products_xml)

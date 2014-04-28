@@ -54,21 +54,23 @@ function cmds.help()
 	end 
 end
 
-function cmds.info(args)
-	local function get_name()
+	local function get_name(args, lim)
 		local sector = ""
-		for i = 2, #args do 
+		for i = lim or 2, #args do 
 			sector = sector .. " " .. args[i]
 		end 
 		sector = sector:sub(2, sector:len())
 		return sector 
 	end 
 
+function cmds.info(args)
+
+
 	if args[1] == "sector" then 
-		local sector = get_name()
+		local sector = get_name(args)
 		bgtools.PrintSectorInfo(sector)
 	elseif args[1] == "product" then 
-		local product = get_name()
+		local product = get_name(args)
 		bgtools.PrintProductInfo(product)
 	else 
 		print("Could not find info on ".. (args[1] or "")..", try product or sector")
@@ -88,7 +90,17 @@ function cmds.notusage(args)
 	cmds.usage(args, true)
 end
 
-
+function cmds.valueincrease(args)
+	local sector = get_name(args,1)
+	local diff, round, input, output = bgtools.SectorAddedValue(sector) 
+	local use = "+"
+	if round < 0 then 
+		use = ""
+	end
+	print("Input worth  : "..input)
+	print("Output worth : " .. output)
+	print("Added value  : ".. diff .. " ("..use .. round .. "%)")
+end
 
 while true do 
 	local cmd = io.read()

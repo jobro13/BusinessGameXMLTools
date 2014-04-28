@@ -4,6 +4,25 @@ local debug = false
 
 local bgtools = {}
 
+function bgtools.GetValues(root)
+	local tags = {} 
+	local data = tostring(root)
+	for match in string.gmatch(data, "<([^>]*)>") do 
+		local tag = root:find(match)
+		if tag then 
+		local my = tag[1]
+		if not tostring(my):match("<([^>]*)>") then 
+			tags[match] = true 
+		end
+		end
+	end 
+	local out = {} 
+	for i,v in pairs(tags) do 
+		table.insert(out, i)
+	end 
+	return out
+end 
+
 function bgtools.GetSector(sectorname)
 	for sector_number, sector_data in pairs(bgtools.sector) do 
 		if sector_data:find("name") and sector_data:find("name")[1]:lower() == sectorname:lower() then 
@@ -317,7 +336,9 @@ out.init = function(sector_xml, products_xml)
 			out[i] = v
 		end
 		bgtools.sector = sector_xml 
-		bgtools.products = products_xml 
+		bgtools.products = products_xml
+		out.sector = sector_xml
+		out.products = products_xml
 	end
 end
 

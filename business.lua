@@ -36,6 +36,19 @@ function cmds.list(args)
 		for i,v in pairs(products) do 
 			print(v)
 		end 
+	elseif what and what:match("^tag") then 
+		local tag_type = args[2] 
+		if tag_type and tag_type:match("^sector") then 
+			local tags = bgtools.GetValues(bgtools.sector[1])
+			for i,v in pairs(tags) do 
+				print(v) 
+			end 
+		elseif tag_type and tag_type:match("^product") then 
+			local tags = bgtools.GetValues(bgtools.products[1])
+			for i,v in pairs(tags) do 
+				print(v) 
+			end
+		end
 	else 
 		print("Cannot list type: ".. (what or "") .." try: sector, product")
 	end
@@ -64,8 +77,6 @@ end
 	end 
 
 function cmds.info(args)
-
-
 	if args[1] == "sector" then 
 		local sector = get_name(args)
 		bgtools.PrintSectorInfo(sector)
@@ -104,7 +115,11 @@ end
 
 function cmds.sort(args)
 	if args[1] == "valueincrease" then 
-		-- sort on vlue increase
+		local mode = "absolute"
+		if args[2] == "relative" then 
+			mode = "relative"
+		end 
+		-- sort on value increase -> absolute / relative ?
 	else 
 		local type = args[1]
 		if type:lower():match("^product") then 
@@ -125,6 +140,20 @@ function cmds.sort(args)
 			end
 		elseif type:lower():match("^sector") then 
 			local sectors = bgtools.GetSectors()
+			local tab = {}
+			local tagger = args[2] 
+			for i,v in pairs(sectors) do 
+				local root = bgtools.GetSector(v)
+				local tag = root:find(tagger)
+				if tag then 
+					tab[i] = {v, tag[1]}
+				end 
+			end 
+			table.sort(tab, function(a,b) return tonumber(a[2]) > tonumber(b[2]) end)
+
+			for i,v in pairs(tab) do 
+				bgtools.pd(i..". "..v[1], v[2])
+			end
 		end
 	end
 end 

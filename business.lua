@@ -17,7 +17,7 @@ end
 
 local cmds = {} 
 
-function cmds.q()
+function cmds.quit()
 	print("Goodbye")
 	os.exit()
 end 
@@ -41,6 +41,10 @@ function cmds.list(args)
 	end
 end 
 
+function cmds.update()
+	bgtools.fileupdate()
+end
+
 function cmds.help()
 	print("Available commands:")
 	for i,v in pairs(cmds) do 
@@ -49,6 +53,27 @@ function cmds.help()
 		end 
 	end 
 end
+
+function cmds.info(args)
+	local function get_name()
+		local sector = ""
+		for i = 2, #args do 
+			sector = sector .. " " .. args[i]
+		end 
+		sector = sector:sub(2, sector:len())
+		return sector 
+	end 
+
+	if args[1] == "sector" then 
+		local sector = get_name()
+		bgtools.PrintSectorInfo(sector)
+	elseif args[1] == "product" then 
+		local product = get_name()
+		bgtools.PrintProductInfo(product)
+	else 
+		print("Could not find info on ".. (args[1] or "")..", try product or sector")
+	end 
+end 
 
 
 
@@ -61,8 +86,11 @@ while true do
 		if root_cmd and cmds[root_cmd] then 
 			-- remove first arg
 			table.remove(args,1)
+			io.write("\n")
 			cmds[root_cmd](args)
 			io.write("\n")
+		else 
+			print("Command ".. (args[1] or "") .. " is unknown: type help for more information on this utility.")
 		end 
 	end 
 end

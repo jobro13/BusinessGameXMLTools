@@ -1,10 +1,12 @@
 local xml = require "LuaXML"
 
+local debug = false 
+
 local bgtools = {}
 
 function bgtools.GetSector(sectorname)
 	for sector_number, sector_data in pairs(bgtools.sector) do 
-		if sector_data:find("name") and sector_data:find("name")[1] == sectorname then 
+		if sector_data:find("name") and sector_data:find("name")[1]:lower() == sectorname:lower() then 
 			return sector_data 
 		end 
 	end 
@@ -12,7 +14,7 @@ end
 
 function bgtools.GetProduct(productname)
 	for product_number, product_data in pairs(bgtools.products) do 
-		if product_data:find("name") and product_data:find("name")[1] == productname then 
+		if product_data:find("name") and product_data:find("name")[1]:lower() == productname:lower() then 
 			return product_data
 		end 
 	end 
@@ -20,7 +22,7 @@ end
 
 function bgtools.FindTag(root, prop, val) 
 	for i, data in pairs(root) do 
-		if data:find(prop) and data:find(prop)[1] == val then 
+		if data:find(prop) and data:find(prop)[1]:lower() == val:lower() then 
 			return data 
 		end 
 	end
@@ -29,8 +31,9 @@ end
 function bgtools.GetProductInfo(product_root)
 	-- name and amount
 	local product = {} 
-	local name = product_root:find("name")
-	local amount = product_root:find("amount") 
+	print(product_root)
+	local name = getval(product_root, "name")
+	local amount = getval(product_root, "amount") 
 	if name and amount then 
 		product.name = name 
 		product.amount = amount 
@@ -56,10 +59,13 @@ function bgtools.GetSectorInputs(sectorname)
 end 
 
 function getval(root, value)
-	if root:find(value) then 
+	if root and root:find(value) then 
 		if root:find(value)[1] ~= nil then 
 			return (root:find(value)[1])
 		end 
+	end
+	if debug then  
+	print("warning: getval did not return anything, root:".. tostring(root) .. " value: ".. tostring(value))
 	end 
 end 
 
@@ -76,7 +82,8 @@ end
 
 function bgtools.ParseProducts(product_list, start)
 	for num, product_data in pairs(product_list) do 
-		print((start or "") .. product_data.name..": "..product_data.amount)
+		pd((start or "") .. product_data.name, product_data.amount)
+		
 	end
 end 
 
@@ -116,12 +123,15 @@ function bgtools.PrintSectorInfo(sectorname)
 		bgtools.ParseProducts(data.input, "|-")
 		print_group("Sector output")
 		bgtools.ParseProducts(data.output, "|-")
-	end 
+	else 
+		print("Sector: "..( sectorname or "" ).." does not exist!")
+	end
 end
 
 function bgtools.GetSectorInfo(sectorname)
 	local sector = bgtools.GetSector(sectorname)
 	if sector then 
+		local data = sector 
 		local output = {}
 		output.name = getval(data, "name")
 		output.price = getval(data, "price")
@@ -134,6 +144,21 @@ function bgtools.GetSectorInfo(sectorname)
 		return output 
 	end 
 	return sector 
+end 
+
+function bgtools.PrintProductInfo(productname)
+	local data = bgtools.GetFullProductInfo(productname)
+	if data then 
+		pd("Product Info", data.name)
+		print_group("Price")
+		pd("|-Current", data.price)
+		pd("|-Minimum", data.minimumprice)
+		pd("|-Maximum", data.maximumprice)
+		print_group("Price History")
+		for i,v in pairs(data.history) do 
+			pd("|-", v)
+		end 
+	end 
 end 
 
 function bgtools.GetSectors()
@@ -151,16 +176,23 @@ function bgtools.GetFullProductInfo(product_name)
 		product_name = bgtools.GetProduct(product_name)
 	end 
 	local data_root = product_name 
-	local out = {} 
-	out.name = getval(data_root, "name")
-	out.price = getval(data_root, "price")
-	out.minimumprice = getval(data_root, "minimum")
-	out.maximumprice = getval(data_root, "maximum")
-	out.history = {} 
-	for i,v in pairs(data_root:find("history")) do
-		table.insert(out, v[1])
+	if data_root then 
+		local out = {}
+		out.name = getval(data_root, "name")
+		out.price = getval(data_root, "price")
+		out.minimumprice = getval(data_root, "minimum")
+		out.maximumprice = getval(data_root, "maximum")
+		out.history = {} 
+		for i,v in pairs(data_root:find("history")) do
+
+			table.insert(out.history, v[1])
+
+		end
+
+		return out
+	else 
+		return false 
 	end
-	return out 
 end
 
 function bgtools.GetProductList() 

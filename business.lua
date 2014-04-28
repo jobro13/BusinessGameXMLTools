@@ -102,6 +102,33 @@ function cmds.valueincrease(args)
 	print("Added value  : ".. diff .. " ("..use .. round .. "%)")
 end
 
+function cmds.sort(args)
+	if args[1] == "valueincrease" then 
+		-- sort on vlue increase
+	else 
+		local type = args[1]
+		if type:lower():match("^product") then 
+			local products = bgtools.GetProductList()
+			local tab = {}
+			local tagger = args[2] 
+			for i,v in pairs(products) do 
+				local root = bgtools.GetProduct(v)
+				local tag = root:find(tagger)
+				if tag then 
+					tab[i] = {v, tag[1]}
+				end 
+			end 
+			table.sort(tab, function(a,b) return tonumber(a[2]) > tonumber(b[2]) end)
+
+			for i,v in pairs(tab) do 
+				bgtools.pd(i..". "..v[1], v[2])
+			end
+		elseif type:lower():match("^sector") then 
+			local sectors = bgtools.GetSectors()
+		end
+	end
+end 
+
 while true do 
 	local cmd = io.read()
 	local args = arg_get(cmd) 
@@ -111,7 +138,10 @@ while true do
 			-- remove first arg
 			table.remove(args,1)
 			io.write("\n")
-			cmds[root_cmd](args)
+			local success, err = pcall(function() cmds[root_cmd](args) end)
+			if err then 
+				print("Command error: "..err)
+			end
 			io.write("\n")
 		else 
 			print("Command ".. (args[1] or "") .. " is unknown: type help for more information on this utility.")

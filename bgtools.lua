@@ -100,6 +100,8 @@ function pd(name, value, len)
 	print(name..": "..value)
 end 
 
+bgtools.pd = pd 
+
 function print_group(gname, len, divider)
 	local space = gname:len() + 2
 	local const = len or 30

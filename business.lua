@@ -31,25 +31,42 @@ function GetSectorInputs(_sector) -- [1] = name, [2] = pointer to data
 	return output
 end 
 
+function getval(root, value)
+	if root:find(value) then 
+		if root:find(value)[1] ~= nil then 
+			return (root:find(value)[1])
+		end 
+	end 
+end 
+
 function GetSectorInfo(_sector)
 	local sector = GetSector(_sector)
 	if sector then 
 		-- start printing info 
-		print("Sector name: " .. sector)
-		print("Price to buy: "..sector:find("price"))
-		print("Employee costs: "..sector:find("employees"))
-		print("Fixed costs: "..sector.fixed)
+		print("Sector name: " .. getval(sector, "name"))
+		print("Price to buy: "..getval(sector, "price"))
+		print("Employee costs: "..getval(sector, "employees"))
+		print("Fixed costs: "..sector:find("fixed")[1])
 		print("-- Sector Machinery Needed --")
 		for machine_number, data in pairs(sector:find("machinery")) do 
-			print(data.name..": "..data.amount)
+			local data = data:find("product")
+			if data then 
+				print(getval(data, "name") ..": ".. getval(data, "amount"))
+			end
 		end 
 		print("-- Sector Input --")
 		for productnumber, data in pairs(sector:find("input")) do 
-			print(data.name..": "..data.amount)
+			local data = data:find("product")
+			if data then 
+				print(getval(data, "name") ..": ".. getval(data, "amount"))
+			end
 		end 
 		print("-- Sector Output --")
 		for productnumber, data in pairs(sector:find("output")) do 
-			print(data.name..": "..data.amount)
+			local data = data:find("product")
+			if data then 
+				print(getval(data, "name") ..": ".. getval(data, "amount"))
+			end
 		end 
 	end 
 end

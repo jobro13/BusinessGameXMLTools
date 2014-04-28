@@ -10,6 +10,22 @@ function bgtools.GetSector(sectorname)
 	end 
 end 	
 
+function bgtools.GetProduct(productname)
+	for product_number, product_data in pairs(bgtools.products) do 
+		if product_data:find("name") and product_data:find("name")[1] == productname then 
+			return product_data
+		end 
+	end 
+end 
+
+function bgtools.FindTag(root, prop, val) 
+	for i, data in pairs(root) do 
+		if data:find(prop) and data:find(prop)[1] == val then 
+			return data 
+		end 
+	end
+end 
+
 function bgtools.GetProductInfo(product_root)
 	-- name and amount
 	local product = {} 
@@ -129,9 +145,36 @@ function bgtools.GetSectors()
 	return out
 end 
 
+function bgtools.GetFullProductInfo(product_name)
+	local product_name = product_name
+	if type(product_name) == "string" then 
+		product_name = bgtools.GetProduct(product_name)
+	end 
+	local data_root = product_name 
+	local out = {} 
+	out.name = getval(data_root, "name")
+	out.price = getval(data_root, "price")
+	out.minimumprice = getval(data_root, "minimum")
+	out.maximumprice = getval(data_root, "maximum")
+	out.history = {} 
+	for i,v in pairs(data_root:find("history")) do
+		table.insert(out, v[1])
+	end
+	return out 
+end
+
+function bgtools.GetProductList() 
+	local out = {} 
+	for pnum, pdata in pairs(bgtools.products) do 
+		local name = getval(pdata, "name")
+		table.insert(out, name)
+	end 
+	return out
+end 
+
 function bgtools.fileupdate()
-	io.popen("curl -O http://businessgame.com/xml/products.xml")
-	io.popen("curl -O http://businessgame.com/xml/sectors.xml")
+	io.popen("curl -O http://businessgame.be/xml/products.xml")
+	io.popen("curl -O http://businessgame.be/xml/sectors.xml")
 	bgtools.sector = xml.load("sectors.xml")
 	bgtools.products = xml.load("products.xml")
 end 
@@ -144,7 +187,7 @@ out.init = function(sector_xml, products_xml)
 			out[i] = v
 		end
 		bgtools.sector = sector_xml 
-		bgtools.prizes = products_xml 
+		bgtools.products = products_xml 
 	end
 end
 

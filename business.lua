@@ -24,13 +24,33 @@ end
 
 function cmds.list(args)
 	local what = args[1]
-	if what:match("^sector") then 
+	if what and what:match("^sector") then 
 		local sectors = bgtools.GetSectors()
+		table.sort(sectors)
 		for i,v in pairs(sectors) do 
 			print(v)
 		end 
-	end 
+	elseif what and  what:match("^product") then 
+		local products = bgtools.GetProductList()
+		table.sort(products) 
+		for i,v in pairs(products) do 
+			print(v)
+		end 
+	else 
+		print("Cannot list type: ".. (what or "") .." try: sector, product")
+	end
 end 
+
+function cmds.help()
+	print("Available commands:")
+	for i,v in pairs(cmds) do 
+		if v ~= cmds.help then 
+			print(i)
+		end 
+	end 
+end
+
+
 
 
 while true do 
@@ -42,6 +62,7 @@ while true do
 			-- remove first arg
 			table.remove(args,1)
 			cmds[root_cmd](args)
+			io.write("\n")
 		end 
 	end 
 end
